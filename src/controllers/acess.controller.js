@@ -22,7 +22,7 @@ export  async function register (req, res){
 export async function login (req, res){
     const {email, password} = req.body
     const token = uuid()
-
+    console.log(email, password)
       
     try{
     
@@ -32,7 +32,8 @@ export async function login (req, res){
       const validateSenha = bcrypt.compareSync( password, user.rows[0].password)
       if(!validateSenha) return res.sendStatus(401)
       //SALVA OS DADOS DO USUARIO NA TABELA USERS
-      await db.query(`INSERT INTO sessions ("userId", token) VALUES ($1,$2);`,[user.rows[0].id, token])
+      //await db.query(`INSERT INTO sessions ("userId", token) VALUES ($1,$2);`,[user.rows[0].id, token])
+      
       res.redirect('/') // REDIRECIONA PARA A PAGINA SEGUINTE
        
     }catch(error){
