@@ -8,7 +8,7 @@ import schemaRegister from "../schemas/register.schema.js";
 
 const acessRouter = Router()
 
-acessRouter.post('/signup', validadeSchema(schemaRegister),register)
+acessRouter.post('/signup', validadeSchema(schemaRegister), register)
 acessRouter.post('/signin',login)
 
 

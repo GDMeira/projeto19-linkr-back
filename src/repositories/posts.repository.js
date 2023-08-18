@@ -1,5 +1,5 @@
 
-import {db} from "../db/db.connection.js"
+import db from "../db/db.connection.js"
 
 export async function allPosts() {
     return await db.query(`SELECT posts.*, users."pictureUrl", 
