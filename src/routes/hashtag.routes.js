@@ -7,7 +7,7 @@ import getTrending, { getHashtagByName } from "../controllers/hashtag.controller
 
 const hashtagRouter = Router()
 
-hashtagRouter.get('/hashtag/:hashtag', tokenValidation, getHashtagByName)
+hashtagRouter.get('/hashtags/:hashtag', tokenValidation, getHashtagByName)
 hashtagRouter.get('/trending', tokenValidation, getTrending)
 
 
