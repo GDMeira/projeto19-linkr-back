@@ -1,17 +1,25 @@
 import urlMetadata from "url-metadata";
 import { allPosts, newPost, getPostByUserId, postOwner, postDelete} from "../repositories/posts.repository.js";
-
+import db from "../database/database.js";
 
 export async function postLink(req, res) {
-    const user = res.locals.user;
+    const authorization = req.headers["authorization"];
+    const token = authorization?.replace("Bearer ", "");
+
+    const user = await db.query(`SELECT * FROM users 
+    JOIN sessions ON users.id = sessions."userId"
+    WHERE sessions.token = $1`, [token]);
+
+    const id = user.rows[0].id;
+
+    if (!user.rowCount) return res.sendStatus(401);
+    
     const {link, postDescription} = req.body;
 
     try{
         //const post = await post(link, description, token)
-
         const linkData = await getLinkData(link);
-
-        const confirm = await newPost(user.id, link, linkData.title, linkData.description, linkData.image, postDescription);
+        const confirm = await newPost(id, link, linkData.title, linkData.description, linkData.image, postDescription);
 
         if (!confirm) return res.status(404).send("This post could not be posted");
 
@@ -24,6 +32,8 @@ export async function postLink(req, res) {
 
 async function getLinkData(link) {
   try {
+
+    console.log(link)
     const result = await urlMetadata(link);
 
     const data = {

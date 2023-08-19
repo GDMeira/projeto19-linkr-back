@@ -1,5 +1,5 @@
 
-import db from "../db/db.connection.js"
+import db from "../database/database.js";
 
 export async function allPosts() {
     return await db.query(`SELECT posts.*, users."pictureUrl", 
@@ -30,9 +30,9 @@ export async function getPostById(id) {
 
 export async function getPostByUserId(userId) {
     return await db.query(
-      `SELECT posts.*, users."pictureUrl", users.name FROM posts JOIN
+      `SELECT posts.*, users."pictureUrl", users."userName" FROM posts JOIN
        users ON users.id = posts."userId" WHERE posts."userId" = $1 
-       ORDER BY date DESC`, [userId]
+       ORDER BY posts.id DESC`, [userId]
     );
 }
 
