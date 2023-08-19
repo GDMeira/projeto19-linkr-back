@@ -12,8 +12,8 @@ export async function allPosts() {
 export async function newPost(userId, link, title, 
     linkDescription, image, postDescription){
      const query = await db.query(
-        `INSERT INTO posts ("userId", link, title, "linkDescription",
-         image, "postDescription") VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO posts ("userId", url, "linkTitle", "linkDescription",
+         "linkImage", "postDescription") VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *`,
         [userId, link, title, linkDescription, image, postDescription]
       );
