@@ -3,8 +3,8 @@ import db from "../database/database.js";
 
 export async function allPosts() {
     return await db.query(`SELECT posts.*, users."pictureUrl", 
-    users.name FROM posts JOIN users ON users.id = posts."userId"
-    ORDER BY date DESC LIMIT 30`, []);
+    users."userName" FROM posts JOIN users ON users.id = posts."userId"
+    ORDER BY id DESC LIMIT 30`, []);
     //await db.query(`SELECT * FROM linkrs WHERE  = true LIMIT 30`)
     
 } 

@@ -1,6 +1,8 @@
 import urlMetadata from "url-metadata";
 import { allPosts, newPost, getPostByUserId, postOwner, postDelete } from "../repositories/posts.repository.js";
 import db from "../database/database.js";
+import reactStringReplace from "react-string-replace";
+import { createHashtags } from "../repositories/hashtag.repositories.js";
 
 export async function postLink(req, res) {
   const userId = res.locals.userId;
@@ -9,14 +11,15 @@ export async function postLink(req, res) {
 
   try {
     const result = await urlMetadata(link);
-    console.log(result.title, result.description, result.image)
-    const confirm = await newPost(userId, link, result.title, result.description, result.image, postDescription);
+    const postDB = await newPost(userId, link, result.title, result.description, result.image, postDescription);
 
-    if (!confirm) return res.status(404).send("This post could not be posted");
+    if (postDB.rowCount === 0) return res.status(404).send("This post could not be posted");
+    const hashtags = [];
+    reactStringReplace(postDescription, /#(\w+)/g, (match) => hashtags.push(match));
+    if (hashtags.length > 0) createHashtags(hashtags, postDB.rows[0].id);
 
     res.sendStatus(201)
   } catch (err) {
-    // console.log(err)
     res.status(500).send(err.message)
   }
 }
