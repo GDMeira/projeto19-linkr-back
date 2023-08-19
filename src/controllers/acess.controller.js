@@ -27,13 +27,16 @@ export async function login (req, res){
     try{
     
         //USUARIO E SENHA COINCIDEM?
-      const user = await db.query(`SELECT * FROM users WHERE email= $1`,[email])
+        const user = await db.query(`select sessions."userId", sessions.token, users."userName",users.password,users.email, users."pictureUrl"
+        from sessions
+        join users on sessions."userId" = users.id
+        WHERE users.email= $1`,[email])
       if(user.rowCount === 0) return res.sendStatus(401)
       const validateSenha = bcrypt.compareSync( password, user.rows[0].password)
       if(!validateSenha) return res.status(401).send('As senhas nao sao iguais')
       //SALVA OS DADOS DO USUARIO NA TABELA USERS
       await db.query(`INSERT INTO sessions ("userId", token) VALUES ($1,$2);`,[user.rows[0].id, token])
-      res.sendStatus(201) //  REDIRECIONA PARA A PAGINA SEGUINTE
+      res.status(201).send(user.rows[0]) //  REDIRECIONA PARA A PAGINA SEGUINTE
        
     }catch(error){
         res.status(500).send(error.message)
@@ -41,7 +44,9 @@ export async function login (req, res){
 }
 
 export async function logout( req, res){
-    const token = req.body
+    const {authorization} = req.headers
+    const token = authorization.replace('Bearer ', '')
+    console.log(token)
     try{
     
       //SE O TOKEN EXISTE PODE DESLOGAR
@@ -49,9 +54,9 @@ export async function logout( req, res){
       from sessions
       join users on sessions."userId" = users.id
       WHERE sessions.token= $1`,[token])
-      
+      console.log(user.rows[0])
       if(user.rowCount === 0) return res.sendStatus(401)
-        res.redirect('/home')
+        res.status(200).send(user.rows[0])
        
     }catch(error){
         res.status(500).send(error.message)
