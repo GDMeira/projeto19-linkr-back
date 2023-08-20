@@ -46,13 +46,16 @@ export async function getPostByUserId(userId) {
                 'linkTitle', posts."linkTitle",
                 'linkDescription', posts."linkDescription",
                 'linkImage', posts."linkImage",
-                'postDescription', posts."postDescription"
+                'postDescription', posts."postDescription",
+                'pictureUrl', users."pictureUrl",
+                'userName', users."userName"
             )
-        ) AS "postsInfo"
+            ORDER BY posts.id DESC
+        ) AS "posts"
         FROM posts JOIN users ON users.id = posts."userId"
         WHERE posts."userId" = $1
-        GROUP BY posts.id, users."userName", users."pictureUrl", posts."userId"
-        ORDER BY posts.id DESC`, [userId]
+        GROUP BY users."userName", users."pictureUrl", posts."userId";
+        `, [userId]
     );
 }
 
