@@ -18,6 +18,7 @@ export default async function getTrending(req, res) {
         
         res.status(200).send(hashtags.rows);
     } catch (error) {
+        console.log(error)
         res.status(500).send(error.message);
     }
 }

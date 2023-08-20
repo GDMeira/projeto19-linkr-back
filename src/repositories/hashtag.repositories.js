@@ -13,7 +13,7 @@ export function readPostsWithHashtag(hashtag) {
                 FROM users WHERE users.id = p."userId"
             ),
             (
-                SELECT users."userName"
+                SELECT COALESCE(json_agg(users."userName"), '[]')
                 FROM likes
                 JOIN users ON users.id = likes."userId"
                 WHERE likes."postId" = p.id

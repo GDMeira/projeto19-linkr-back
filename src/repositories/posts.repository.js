@@ -2,8 +2,16 @@
 import db from "../database/database.js";
 
 export async function allPosts() {
-    return await db.query(`SELECT posts.*, users."pictureUrl", 
-    users."userName" FROM posts JOIN users ON users.id = posts."userId"
+    return await db.query(`
+    SELECT posts.*, users."pictureUrl", users."userName",
+    (
+        SELECT COALESCE(json_agg(users."userName"), '[]')
+        FROM likes
+        JOIN users ON users.id = likes."userId"
+        WHERE likes."postId" = posts.id
+    ) AS likers
+    FROM posts 
+    JOIN users ON users.id = posts."userId"
     ORDER BY id DESC LIMIT 30`, []);
     //await db.query(`SELECT * FROM linkrs WHERE  = true LIMIT 30`)
     
@@ -45,4 +53,19 @@ export async function postOwner(user, id) {
 
 export async function postDelete(id) {
     return await db.query(`DELETE FROM posts WHERE id = $1;`, [id]);
+}
+
+export function createLike(postId, userId) {
+    return db.query(
+        `INSERT INTO likes ("postId", "userId") VALUES ($1, $2);`,
+        [postId, userId]
+      );
+}
+
+export function deleteLikeDB(postId, userId) {
+    return db.query(`
+        DELETE FROM likes
+        WHERE "postId" = $1 AND "userId" = $2;`,
+        [postId, userId]
+      );
 }

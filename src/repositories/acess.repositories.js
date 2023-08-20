@@ -7,3 +7,10 @@ export function findSessionByToken(token) {
             WHERE token = $1;
         `, [token]);
 }
+
+export function deleteSessionDB(userId) {
+    return db.query(`
+            DELETE FROM sessions
+            WHERE "userId" = $1;
+        `, [userId]);
+}
