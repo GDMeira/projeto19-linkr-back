@@ -1,5 +1,5 @@
 import urlMetadata from "url-metadata";
-import { allPosts, newPost, getPostByUserId, postOwner, postDelete } from "../repositories/posts.repository.js";
+import { allPosts, newPost, getPostByUserId, postOwner, postDelete, createLike, deleteLikeDB } from "../repositories/posts.repository.js";
 import db from "../database/database.js";
 import reactStringReplace from "react-string-replace";
 import { createHashtags } from "../repositories/hashtag.repositories.js";
@@ -72,6 +72,32 @@ export async function deletePost(req, res) {
     if (!deletePost.rowCount) return res.sendStatus(400);
 
     res.sendStatus(200);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+export async function postLike(req, res) {
+  const { postId } = req.params;
+  if (!Number(postId) || Number(postId) < 1) return res.status(404).send('Id do post inválido.')
+  
+  try {
+    await createLike(postId, res.locals.userId);
+
+    res.sendStatus(201);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+export async function deleteLike(req, res) {
+  const { postId } = req.params;
+  if (!Number(postId) || Number(postId) < 1) return res.status(404).send('Id do post inválido.')
+  
+  try {
+    await deleteLikeDB(postId, res.locals.userId);
+
+    res.sendStatus(204);
   } catch (error) {
     return res.status(500).send(error.message);
   }
