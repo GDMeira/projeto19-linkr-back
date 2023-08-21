@@ -13,8 +13,9 @@ export async function findUsers(email){
     return result
 }
 
-export async function insertUsers(body, hash){
-    const { email, userName, pictureUrl } = body;
+export async function insertUsers(body){
+    const {email, password,userName, pictureUrl} = body
+    const hash = bcrypt.hashSync(password,2)
     const result = await db.query(`INSERT INTO users (email, password, "userName", "pictureUrl") VALUES ($1,$2,$3,$4);`,[email,hash,userName,pictureUrl])
     return result
 }
