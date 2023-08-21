@@ -23,9 +23,9 @@ export async function insertUsers(body){
 //FUNCAO LOGIN
 
 export async function comparePasswords(email){
-    const result = await db.query(`select sessions."userId", sessions.token, users."userName",users.password,users.email, users."pictureUrl"
-        from sessions
-        join users on sessions."userId" = users.id
+    const result = await db.query(`
+        select users."userName", users.password, users."pictureUrl"
+        from users
         WHERE users.email= $1`,[email])
     return result 
 }
