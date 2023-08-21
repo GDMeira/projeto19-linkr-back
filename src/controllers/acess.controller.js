@@ -1,7 +1,7 @@
 
 import bcrypt from "bcrypt"
 import { v4 as uuid } from "uuid"
-import { comparePasswords, findToken, findUsers, insertUserSession, insertUsers, deleteSessionDB } from "../repositories/acess.repositories.js";
+import { comparePasswords, findToken, findUsers, insertUserSession, insertUsers } from "../repositories/acess.repositories.js";
 
 export async function register(req, res) {
     const { email } = req.body
@@ -54,22 +54,25 @@ export async function login(req, res) {
 export async function logout(req, res) {
     const { authorization } = req.headers
     const token = authorization.replace('Bearer ', '')
+    
 
     try {
 
         //SE O TOKEN EXISTE PODE DESLOGAR
         const user = await findToken(token)
+        
         if (user.rowCount === 0) return res.sendStatus(401)
+        
         res.status(200).send(user.rows[0])
 
     } catch (error) {
         res.status(500).send(error.message)
     }
 }
-export async function deleteSession(req, res) {
+/*export async function deleteSession(req, res) {
     try {
         await deleteSessionDB(res.locals.userId)
     } catch (error) {
         res.status(500).send(error.message)
     }
-}
+}*/
