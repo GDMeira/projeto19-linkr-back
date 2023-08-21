@@ -35,6 +35,7 @@ export async function login(req, res) {
         if (!validateSenha) return res.status(401).send('As senhas nao sao iguais')
 
         //SALVA OS DADOS DO USUARIO NA TABELA sessions
+        console.log(user.rows[0],"dados do user")
         await insertUserSession(user.rows[0].id, token)
         const response = {
             image: user.rows[0].pictureUrl,
@@ -52,12 +53,13 @@ export async function login(req, res) {
 export async function logout(req, res) {
     const { authorization } = req.headers
     const token = authorization.replace('Bearer ', '')
-    
+    console.log(token)
 
     try {
 
         //SE O TOKEN EXISTE PODE DESLOGAR
         const user = await findToken(token)
+        
         
         if (user.rowCount === 0) return res.sendStatus(401)
         
