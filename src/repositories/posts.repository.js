@@ -41,7 +41,7 @@ export async function getPostByUserId(userId) {
         `SELECT
         users."userName",
         users."pictureUrl",
-        posts."userId",
+        users.id,
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'id', posts.id,
@@ -61,12 +61,13 @@ export async function getPostByUserId(userId) {
                 )
             )
             ORDER BY posts.id DESC
-        ) AS "posts"
-    FROM posts
-    JOIN users ON users.id = posts."userId"
-    WHERE posts."userId" = $1
-    GROUP BY users."userName", users."pictureUrl", posts."userId";
-    ;
+        ) FILTER (WHERE posts.id IS NOT NULL) AS "posts"
+    FROM users
+    LEFT JOIN posts ON users.id = posts."userId"
+    WHERE users.id = $1
+    GROUP BY users."userName", users."pictureUrl", users.id;
+    
+    
         `, [userId]
     );
 }
