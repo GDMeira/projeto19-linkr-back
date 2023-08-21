@@ -70,10 +70,3 @@ export async function logout(req, res) {
         res.status(500).send(error.message)
     }
 }
-/*export async function deleteSession(req, res) {
-    try {
-        await deleteSessionDB(res.locals.userId)
-    } catch (error) {
-        res.status(500).send(error.message)
-    }
-}*/
