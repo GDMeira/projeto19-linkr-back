@@ -40,7 +40,8 @@ export async function login(req, res) {
         const response = {
             image: user.rows[0].pictureUrl,
             userName: user.rows[0].userName,
-            token
+            token,
+            id: user.rows[0].id
         };
 
         res.status(201).send(response) //  REDIRECIONA PARA A PAGINA SEGUINTE
