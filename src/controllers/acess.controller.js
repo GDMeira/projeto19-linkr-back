@@ -11,7 +11,9 @@ export async function register(req, res) {
         const registroResponse = await findUsers(email)
         if (registroResponse.rowCount !== 0) return res.sendStatus(409)
 
-        await insertUsers(req.body)
+        const { password } = req.body;
+        const hash = bcrypt.hashSync(password, 10)
+        await insertUsers(req.body, hash)
         res.sendStatus(201)
 
     } catch (error) {
@@ -39,7 +41,8 @@ export async function login(req, res) {
         const response = {
             image: user.rows[0].pictureUrl,
             userName: user.rows[0].userName,
-            token
+            token,
+            id: user.rows[0].id
         };
 
         res.status(201).send(response) //  REDIRECIONA PARA A PAGINA SEGUINTE
