@@ -11,7 +11,9 @@ export async function register(req, res) {
         const registroResponse = await findUsers(email)
         if (registroResponse.rowCount !== 0) return res.sendStatus(409)
 
-        await insertUsers(req.body)
+        const { password } = req.body;
+        const hash = bcrypt.hashSync(password, 10)
+        await insertUsers(req.body, hash)
         res.sendStatus(201)
 
     } catch (error) {
