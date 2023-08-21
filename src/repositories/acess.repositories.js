@@ -1,8 +1,8 @@
-import { db } from "../database/database.js";
+import db from "../database/database.js";
 
 export function findSessionByToken(token) {
     return db.query(`
-            SELECT id, user_id AS "userId", token 
+            SELECT id, "userId", token 
             FROM sessions
             WHERE token = $1;
         `, [token]);
@@ -42,4 +42,10 @@ export async function findToken (token){
     join users on sessions."userId" = users.id
     WHERE sessions.token= $1`,[token])
     return result
+}
+export function deleteSessionDB(userId) {
+    return db.query(`
+            DELETE FROM sessions
+            WHERE "userId" = $1;
+        `, [userId]);
 }

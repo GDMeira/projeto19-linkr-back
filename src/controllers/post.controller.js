@@ -1,55 +1,40 @@
 import urlMetadata from "url-metadata";
-import { allPosts, newPost, getPostByUserId, postOwner, postDelete} from "../repositories/posts.repository.js";
-
+import { allPosts, newPost, getPostByUserId, postOwner, postDelete, createLike, deleteLikeDB } from "../repositories/posts.repository.js";
+import db from "../database/database.js";
+import reactStringReplace from "react-string-replace";
+import { createHashtags } from "../repositories/hashtag.repositories.js";
 
 export async function postLink(req, res) {
-    const user = res.locals.user;
-    const {link, postDescription} = req.body;
+  const userId = res.locals.userId;
 
-    try{
-        //const post = await post(link, description, token)
+  const { link, postDescription } = req.body;
 
-        const linkData = await getLinkData(link);
-
-        const confirm = await newPost(user.id, link, linkData.title, linkData.description, linkData.image, postDescription);
-
-        if (!confirm) return res.status(404).send("This post could not be posted");
-
-        res.sendStatus(201)
-    } catch (err) {
-        console.log(err)
-        res.status(500).send(err.message)
-    }
-}
-
-async function getLinkData(link) {
   try {
     const result = await urlMetadata(link);
+    const postDB = await newPost(userId, link, result.title, result.description, result.image, postDescription);
 
-    const data = {
-      url: result.url,
-      title: result.title,
-      description: result.description,
-      image: result.image,
-    };
+    if (postDB.rowCount === 0) return res.status(404).send("This post could not be posted");
+    const hashtags = [];
+    reactStringReplace(postDescription, /#(\w+)/g, (match) => hashtags.push(match));
+    if (hashtags.length > 0) createHashtags(hashtags, postDB.rows[0].id);
 
-    return data;
+    res.sendStatus(201)
   } catch (err) {
-    console.log(err);
+    res.status(500).send(err.message)
   }
 }
 
 export async function getposts(req, res) {
-    const user = res.locals.user;
+  const user = res.locals.user;
 
-    try{
-        const getPosts = await allPosts();
+  try {
+    const getPosts = await allPosts();
 
-        res.status(200).send(getPosts.rows)
-    } catch (err) {
-        console.log(err)
-        res.status(500).send(err.message)
-    }    
+    res.status(200).send(getPosts.rows)
+  } catch (err) {
+    console.log(err)
+    res.status(500).send(err.message)
+  }
 }
 
 
@@ -87,6 +72,32 @@ export async function deletePost(req, res) {
     if (!deletePost.rowCount) return res.sendStatus(400);
 
     res.sendStatus(200);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+export async function postLike(req, res) {
+  const { postId } = req.params;
+  if (!Number(postId) || Number(postId) < 1) return res.status(404).send('Id do post inválido.')
+  
+  try {
+    await createLike(postId, res.locals.userId);
+
+    res.sendStatus(201);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+export async function deleteLike(req, res) {
+  const { postId } = req.params;
+  if (!Number(postId) || Number(postId) < 1) return res.status(404).send('Id do post inválido.')
+  
+  try {
+    await deleteLikeDB(postId, res.locals.userId);
+
+    res.sendStatus(204);
   } catch (error) {
     return res.status(500).send(error.message);
   }

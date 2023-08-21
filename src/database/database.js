@@ -1,15 +1,25 @@
-import pg from "pg"
-import dotenv from "dotenv"
+import pg from 'pg';
+import dotenv from 'dotenv';
 
-dotenv.config()
+dotenv.config();
 
-const { Pool } = pg
+const { Pool } = pg;
 
-const configDatabase = {
-  
-  connectionString: process.env.DATABASE_URL,
-  //ssl:false,
+const configDataBase = {
+    connectionString: process.env.DATABASE_URL
+}
 
-};
-if (process.env.NODE_ENV === "production") configDatabase.ssl = true;
-export const db = new Pool(configDatabase)
+if (process.env.NODE_ENV === "production") configDataBase.ssl = true;
+
+const db = new Pool(configDataBase)
+
+db.connect((error, client, done) => {
+    if (error) {
+        console.error('Error connecting to PostgresSQL', error);
+    } else {
+        console.log('Connected to PostgresSQL');
+        done();
+    }
+});
+
+export default db
