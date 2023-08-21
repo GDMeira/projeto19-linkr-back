@@ -3,7 +3,7 @@ import db from "../database/database.js";
 export function readPostsWithHashtag(hashtag) {
     return db.query(`
         SELECT 
-            p.id, p.url, p."postDescription", p."linkTitle", p."linkDescription", p."linkImage", 
+            p.id, p.url, p."userId", p."postDescription", p."linkTitle", p."linkDescription", p."linkImage", 
             (
                 SELECT users."pictureUrl"
                 FROM users WHERE users.id = p."userId"

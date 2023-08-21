@@ -38,8 +38,11 @@ export async function getPostById(id) {
 
 export async function getPostByUserId(userId) {
     return await db.query(
-        `SELECT users."userName", 
-        users."pictureUrl", posts."userId", JSON_AGG(
+        `SELECT
+        users."userName",
+        users."pictureUrl",
+        posts."userId",
+        JSON_AGG(
             JSON_BUILD_OBJECT(
                 'id', posts.id,
                 'url', posts.url,
@@ -48,13 +51,22 @@ export async function getPostByUserId(userId) {
                 'linkImage', posts."linkImage",
                 'postDescription', posts."postDescription",
                 'pictureUrl', users."pictureUrl",
-                'userName', users."userName"
+                'userName', users."userName",
+                'userId', posts."userId",
+                'likers', (
+                    SELECT COALESCE(JSON_AGG(users."userName"), '[]')
+                    FROM likes
+                    JOIN users ON users.id = likes."userId"
+                    WHERE likes."postId" = posts.id
+                )
             )
             ORDER BY posts.id DESC
         ) AS "posts"
-        FROM posts JOIN users ON users.id = posts."userId"
-        WHERE posts."userId" = $1
-        GROUP BY users."userName", users."pictureUrl", posts."userId";
+    FROM posts
+    JOIN users ON users.id = posts."userId"
+    WHERE posts."userId" = $1
+    GROUP BY users."userName", users."pictureUrl", posts."userId";
+    ;
         `, [userId]
     );
 }
