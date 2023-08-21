@@ -12,7 +12,7 @@ const acessRouter = Router()
 
 acessRouter.post('/signup', validadeSchema(schemaRegister), register)
 acessRouter.post('/signin',login)
-acessRouter.delete('/logout', tokenValidation, deleteSession)
+//acessRouter.delete('/logout', tokenValidation, deleteSession)
 acessRouter.delete('/logout',logout)
 
 

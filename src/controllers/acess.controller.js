@@ -23,13 +23,14 @@ export  async function register (req, res){
 export async function login (req, res){
     const { email, password } = req.body
     const token = uuid()
+        
     
       
     try{
     
         //USUARIO E SENHA COINCIDEM?
       const user = await comparePasswords(email)
-
+    console.log(user.rows[0])
       if(user.rowCount === 0) return res.sendStatus(401)
       const validateSenha = bcrypt.compareSync( password, user.rows[0].password)
       if(!validateSenha) return res.status(401).send('As senhas nao sao iguais')

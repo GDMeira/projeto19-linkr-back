@@ -1,4 +1,5 @@
 import db from "../database/database.js";
+import bcrypt from "bcrypt"
 
 export function findSessionByToken(token) {
     return db.query(`
