@@ -12,9 +12,7 @@ export async function allPosts() {
     ) AS likers
     FROM posts 
     JOIN users ON users.id = posts."userId"
-    ORDER BY id DESC LIMIT 20`, []);
-    //await db.query(`SELECT * FROM linkrs WHERE  = true LIMIT 30`)
-    
+    ORDER BY id DESC LIMIT 20`, []);    
 } 
 
 export async function newPost(userId, link, title, 
