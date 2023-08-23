@@ -42,6 +42,12 @@ export async function getPostByUserId(userId) {
         users."userName",
         users."pictureUrl",
         users.id,
+        (
+            SELECT COALESCE(JSON_AGG(users."userName"), '[]')
+            FROM follows
+            JOIN users ON users.id = follows."followerId"
+            WHERE follows."followedId" = $1
+        ) AS "followers",
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'id', posts.id,
