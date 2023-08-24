@@ -32,7 +32,6 @@ export async function getposts(req, res) {
     const getPosts = await allPosts(userId);
 
     res.status(200).send(getPosts.rows)
-    console.log(userId)
   } catch (err) {
     console.log(err)
     res.status(500).send(err.message)
@@ -58,6 +57,7 @@ export async function getPostByUser(req, res) {
     const getUserPosts = await getPostByUserId(id);
     return res.send(getUserPosts.rows[0]);
   } catch (error) {
+    console.log(error)
     return res.status(500).send(error.message);
   }
 }

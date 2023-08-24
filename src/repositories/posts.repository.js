@@ -65,7 +65,8 @@ export async function getPostById(id) {
 
 export async function getPostByUserId(userId) {
     return await db.query(
-        `SELECT
+        `/* SQL */
+        SELECT
         users."userName",
         users."pictureUrl",
         users.id,
@@ -91,6 +92,24 @@ export async function getPostByUserId(userId) {
                     FROM likes
                     JOIN users ON users.id = likes."userId"
                     WHERE likes."postId" = posts.id
+                ),
+                'comments', (
+                    SELECT COALESCE(json_agg(
+                        json_build_object(
+                            'comment', comments.comment,
+                            'userName', users."userName",
+                            'pictureUrl', users."pictureUrl",
+                            'isFollowed',
+                            EXISTS (
+                                SELECT 1
+                                FROM follows
+                                WHERE follows."followedId" = comments."userId" AND follows."followerId" = $1
+                            )
+                        )
+                    ), '[]')
+                    FROM comments
+                    JOIN users ON users.id = comments."userId"
+                    WHERE comments."postId" = posts.id
                 )
             )
             ORDER BY posts.id DESC
