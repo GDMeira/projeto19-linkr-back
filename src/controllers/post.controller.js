@@ -15,7 +15,9 @@ export async function postLink(req, res) {
 
     if (postDB.rowCount === 0) return res.status(404).send("This post could not be posted");
     const hashtags = [];
-    reactStringReplace(postDescription, /#(\w+)/g, (match) => hashtags.push(match));
+    reactStringReplace(postDescription, /#(\w+)/g, (match) => {
+      if (!hashtags.includes(match)) hashtags.push(match)
+    });
     if (hashtags.length > 0) createHashtags(hashtags, postDB.rows[0].id);
 
     res.sendStatus(201)
@@ -25,12 +27,13 @@ export async function postLink(req, res) {
 }
 
 export async function getposts(req, res) {
-  const user = res.locals.user;
+  const userId = res.locals.userId;
 
   try {
-    const getPosts = await allPosts();
+    const getPosts = await allPosts(userId);
 
     res.status(200).send(getPosts.rows)
+    console.log(userId)
   } catch (err) {
     console.log(err)
     res.status(500).send(err.message)

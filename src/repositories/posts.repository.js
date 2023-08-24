@@ -1,21 +1,30 @@
 
 import db from "../database/database.js";
 
-export async function allPosts() {
-    return await db.query(`
-    SELECT posts.*, users."pictureUrl", users."userName",
-    (
-        SELECT COALESCE(json_agg(users."userName"), '[]')
-        FROM likes
-        JOIN users ON users.id = likes."userId"
-        WHERE likes."postId" = posts.id
-    ) AS likers
-    FROM posts 
-    JOIN users ON users.id = posts."userId"
-    ORDER BY id DESC LIMIT 20`, []);
-    //await db.query(`SELECT * FROM linkrs WHERE  = true LIMIT 30`)
-    
-} 
+export async function allPosts(userId) {
+    try {
+        const result = await db.query(`
+            SELECT posts.*, users."pictureUrl", users."userName",
+            (
+                SELECT COALESCE(json_agg(users."userName"), '[]')
+                FROM likes
+                JOIN users ON users.id = likes."userId"
+                WHERE likes."postId" = posts.id
+            ) AS likers
+            FROM posts 
+            JOIN users ON users.id = posts."userId"
+            JOIN follows ON follows."followerId" = $1
+            WHERE follows."followedId" = posts."userId"
+            ORDER BY id DESC LIMIT 20
+        `, [userId]);
+
+        return result;
+    } catch (error) {
+        // Handle the error here
+        console.error("Error fetching posts:", error);
+        throw error; // Rethrow the error if needed
+    }
+}
 
 export async function newPost(userId, link, title, 
     linkDescription, image, postDescription){
@@ -42,6 +51,12 @@ export async function getPostByUserId(userId) {
         users."userName",
         users."pictureUrl",
         users.id,
+        (
+            SELECT COALESCE(JSON_AGG(users."userName"), '[]')
+            FROM follows
+            JOIN users ON users.id = follows."followerId"
+            WHERE follows."followedId" = $1
+        ) AS "followers",
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'id', posts.id,
