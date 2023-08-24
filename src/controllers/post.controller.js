@@ -33,7 +33,6 @@ export async function getposts(req, res) {
     const getPosts = await allPosts(userId);
 
     res.status(200).send(getPosts.rows)
-    console.log(userId)
   } catch (err) {
     console.log(err)
     res.status(500).send(err.message)
@@ -65,12 +64,10 @@ export async function getPostByUser(req, res) {
 
 export async function deletePost(req, res) {
   const { postId } = req.params;
-  //const user = res.locals;
   console.log(postId)
   if (!postId) return res.status(404).send("Post doesn't exist");
   try {
     postDelete(postId)
-    //if (!deletePost.rowCount) return res.sendStatus(400);
 
     res.sendStatus(200);
   } catch (error) {
@@ -83,8 +80,6 @@ export async function editPost(req, res) {
   console.log(req.params)
   console.log(postId)
   const {description} = req.body
-  //console.log(req.body)
-  //const {userId, token}= res.locals;
   console.log(description)
   if (!postId) return res.status(404).send("Post doesn't exist");
   try {
