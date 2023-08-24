@@ -87,13 +87,6 @@ export async function getPostByUserId(userId) {
     );
 }
 
-export async function postOwner(user, id) {
-    return await db.query(
-        `SELECT user.id, id FROM posts WHERE user_id = $1 and id = $2`,
-        [user.id, id]
-      );
-}
-
 export async function postDelete(id) {
     await db.query(`DELETE FROM likes WHERE "postId" = $1`, [id]);
     await db.query(`DELETE FROM reposts WHERE "postId" = $1`, [id]);
