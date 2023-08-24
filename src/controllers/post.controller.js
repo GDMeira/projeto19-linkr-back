@@ -25,12 +25,13 @@ export async function postLink(req, res) {
 }
 
 export async function getposts(req, res) {
-  const user = res.locals.user;
+  const userId = res.locals.userId;
 
   try {
-    const getPosts = await allPosts();
+    const getPosts = await allPosts(userId);
 
     res.status(200).send(getPosts.rows)
+    console.log(userId)
   } catch (err) {
     console.log(err)
     res.status(500).send(err.message)
