@@ -1,5 +1,6 @@
 import urlMetadata from "url-metadata";
-import { allPosts, newPost, getPostByUserId, postOwner, postDelete, createLike, deleteLikeDB } from "../repositories/posts.repository.js";
+import { allPosts, newPost, getPostByUserId, postOwner, postDelete, createLike, deleteLikeDB, postEdit } from "../repositories/posts.repository.js";
+import db from "../database/database.js";
 import reactStringReplace from "react-string-replace";
 import { createHashtags } from "../repositories/hashtag.repositories.js";
 
@@ -63,19 +64,33 @@ export async function getPostByUser(req, res) {
 }
 
 export async function deletePost(req, res) {
-  const { id } = req.params;
-  const user = res.locals.user;
-
-  if (!id) return res.status(404).send("Post doesn't exist");
+  const { postId } = req.params;
+  console.log(postId)
+  if (!postId) return res.status(404).send("Post doesn't exist");
   try {
-    const owner = postOwner(user, id)
-    if (!owner.rowCount) return res.sendStatus(401);
-    const deletePost = postDelete(id)
-    if (!deletePost.rowCount) return res.sendStatus(400);
+    postDelete(postId)
 
     res.sendStatus(200);
   } catch (error) {
     return res.status(500).send(error.message);
+  }
+}
+
+export async function editPost(req, res) {
+  const {postId} = req.params;
+  console.log(req.params)
+  console.log(postId)
+  const {description} = req.body
+  console.log(description)
+  if (!postId) return res.status(404).send("Post doesn't exist");
+  try {
+
+    postEdit(postId, description)
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send(console.log(error.message));
   }
 }
 
