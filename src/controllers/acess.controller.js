@@ -35,7 +35,6 @@ export async function login(req, res) {
         if (!validateSenha) return res.status(401).send('As senhas nao sao iguais')
 
         //SALVA OS DADOS DO USUARIO NA TABELA sessions
-        console.log(user.rows[0],"dados do user")
         await insertUserSession(user.rows[0].id, token)
         const response = {
             image: user.rows[0].pictureUrl,
@@ -44,7 +43,7 @@ export async function login(req, res) {
             id: user.rows[0].id
         };
 
-        res.status(201).send(response) //  REDIRECIONA PARA A PAGINA SEGUINTE
+        res.status(201).send(response) 
 
     } catch (error) {
         res.status(500).send(error.message)
@@ -54,7 +53,6 @@ export async function login(req, res) {
 export async function logout(req, res) {
     const { authorization } = req.headers
     const token = authorization.replace('Bearer ', '')
-    console.log(token)
 
     try {
 
