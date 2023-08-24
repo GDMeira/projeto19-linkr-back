@@ -87,15 +87,19 @@ export async function getPostByUserId(userId) {
     );
 }
 
-export async function postOwner(user, id) {
-    return await db.query(
-        `SELECT user_id, id FROM posts WHERE user_id = $1 and id = $2`,
-        [user.id, id]
-      );
+export async function postDelete(id) {
+    await db.query(`DELETE FROM likes WHERE "postId" = $1`, [id]);
+    await db.query(`DELETE FROM reposts WHERE "postId" = $1`, [id]);
+    await db.query(`DELETE FROM posts_hashtags WHERE "postId" = $1`, [id]);
+    return await db.query(`DELETE FROM posts WHERE id = $1;`, [id]);
 }
 
-export async function postDelete(id) {
-    return await db.query(`DELETE FROM posts WHERE id = $1;`, [id]);
+export async function postEdit(id, description) {
+    try {
+    return await db.query(`UPDATE posts SET "postDescription" = $1 WHERE id = $2;`, [description, id])
+    } catch (err) {
+        console.error("Error in postEdit:", err);
+    }
 }
 
 export function createLike(postId, userId) {
