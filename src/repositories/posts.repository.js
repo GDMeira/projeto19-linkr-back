@@ -1,7 +1,7 @@
 
 import db from "../database/database.js";
 
-export async function allPosts() {
+export async function allPosts(userId) {
     return await db.query(`
     SELECT posts.*, users."pictureUrl", users."userName",
     (
@@ -9,10 +9,29 @@ export async function allPosts() {
         FROM likes
         JOIN users ON users.id = likes."userId"
         WHERE likes."postId" = posts.id
-    ) AS likers
+    ) AS likers,
+    (
+        SELECT COALESCE(json_agg(
+            json_build_object(
+                'comment', comments.comment, 
+                'userName', users."userName", 
+                'pictureUrl', users."pictureUrl",
+                'isFollowed', EXISTS (
+                    SELECT 1 
+                    FROM follows
+                    WHERE follows."followerId" = $1 AND follows."followedId" = comments."userId"
+                )
+            )
+        ), '[]')
+        FROM comments
+        JOIN users ON users.id = comments."userId"
+        WHERE comments."postId" = posts.id
+        ORDER BY comments."createdAt" DESC
+    ) AS comments
     FROM posts 
     JOIN users ON users.id = posts."userId"
-    ORDER BY id DESC LIMIT 20`, []);    
+    ORDER BY id DESC 
+    LIMIT 20`, [userId]);    
 } 
 
 export async function newPost(userId, link, title, 
