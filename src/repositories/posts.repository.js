@@ -3,14 +3,32 @@ import db from "../database/database.js";
 
 export async function allPosts(userId) {
     try {
-        const result = await db.query(`
+        const result = await db.query(`/* SQL */
             SELECT posts.*, users."pictureUrl", users."userName",
             (
                 SELECT COALESCE(json_agg(users."userName"), '[]')
                 FROM likes
                 JOIN users ON users.id = likes."userId"
                 WHERE likes."postId" = posts.id
-            ) AS likers
+            ) AS likers,
+            (
+                SELECT COALESCE(json_agg(
+                    json_build_object(
+                        'comment', comments.comment,
+                        'userName', users."userName",
+                        'pictureUrl', users."pictureUrl",
+                        'isFollowed',
+                        EXISTS (
+                            SELECT 1
+                            FROM follows
+                            WHERE follows."followedId" = comments."userId" AND follows."followerId" = $1
+                        )
+                    )
+                ), '[]')
+                FROM comments
+                JOIN users ON users.id = comments."userId"
+                WHERE comments."postId" = posts.id
+            ) AS comments
             FROM posts 
             JOIN users ON users.id = posts."userId"
             JOIN follows ON follows."followerId" = $1
@@ -26,15 +44,15 @@ export async function allPosts(userId) {
     }
 }
 
-export async function newPost(userId, link, title, 
-    linkDescription, image, postDescription){
-     const query = await db.query(
+export async function newPost(userId, link, title,
+    linkDescription, image, postDescription) {
+    const query = await db.query(
         `INSERT INTO posts ("userId", url, "linkTitle", "linkDescription",
          "linkImage", "postDescription") VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *`,
         [userId, link, title, linkDescription, image, postDescription]
-      );
-      return query;
+    );
+    return query;
 }
 
 export async function getPostById(id) {
@@ -42,12 +60,13 @@ export async function getPostById(id) {
         `SELECT posts.*, users."pictureUrl", users.name FROM posts JOIN
          users ON users.id = posts."userId" WHERE post.id = $1 
          ORDER BY date DESC`, [id]
-      );
+    );
 }
 
 export async function getPostByUserId(userId) {
     return await db.query(
-        `SELECT
+        `/* SQL */
+        SELECT
         users."userName",
         users."pictureUrl",
         users.id,
@@ -73,6 +92,24 @@ export async function getPostByUserId(userId) {
                     FROM likes
                     JOIN users ON users.id = likes."userId"
                     WHERE likes."postId" = posts.id
+                ),
+                'comments', (
+                    SELECT COALESCE(json_agg(
+                        json_build_object(
+                            'comment', comments.comment,
+                            'userName', users."userName",
+                            'pictureUrl', users."pictureUrl",
+                            'isFollowed',
+                            EXISTS (
+                                SELECT 1
+                                FROM follows
+                                WHERE follows."followedId" = comments."userId" AND follows."followerId" = $1
+                            )
+                        )
+                    ), '[]')
+                    FROM comments
+                    JOIN users ON users.id = comments."userId"
+                    WHERE comments."postId" = posts.id
                 )
             )
             ORDER BY posts.id DESC
@@ -106,7 +143,7 @@ export function createLike(postId, userId) {
     return db.query(
         `INSERT INTO likes ("postId", "userId") VALUES ($1, $2);`,
         [postId, userId]
-      );
+    );
 }
 
 export function deleteLikeDB(postId, userId) {
@@ -114,5 +151,5 @@ export function deleteLikeDB(postId, userId) {
         DELETE FROM likes
         WHERE "postId" = $1 AND "userId" = $2;`,
         [postId, userId]
-      );
+    );
 }

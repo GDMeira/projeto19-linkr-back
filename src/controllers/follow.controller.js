@@ -3,7 +3,6 @@ import db from "../database/database.js";
 
 export async function follow(req, res) {
     const followerId = res.locals.userId;
-    console.log(res.locals)
         
     const { followedId } = req.params
 
