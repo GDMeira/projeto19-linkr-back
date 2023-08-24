@@ -13,36 +13,36 @@ export async function allPosts(userId) {
     (
         SELECT COALESCE(json_agg(
             json_build_object(
-                'comment', comments.comment, 
-                'userName', users."userName", 
+                'comment', comments.comment,
+                'userName', users."userName",
                 'pictureUrl', users."pictureUrl",
-                'isFollowed', EXISTS (
-                    SELECT 1 
+                'isFollowed',
+                EXISTS (
+                    SELECT 1
                     FROM follows
-                    WHERE follows."followerId" = $1 AND follows."followedId" = comments."userId"
+                    WHERE follows."followedId" = comments."userId" AND follows."followerId" = $1
                 )
             )
         ), '[]')
         FROM comments
         JOIN users ON users.id = comments."userId"
         WHERE comments."postId" = posts.id
-        ORDER BY comments."createdAt" DESC
     ) AS comments
     FROM posts 
     JOIN users ON users.id = posts."userId"
     ORDER BY id DESC 
-    LIMIT 20`, [userId]);    
-} 
+    LIMIT 20`, [userId]);
+}
 
-export async function newPost(userId, link, title, 
-    linkDescription, image, postDescription){
-     const query = await db.query(
+export async function newPost(userId, link, title,
+    linkDescription, image, postDescription) {
+    const query = await db.query(
         `INSERT INTO posts ("userId", url, "linkTitle", "linkDescription",
          "linkImage", "postDescription") VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *`,
         [userId, link, title, linkDescription, image, postDescription]
-      );
-      return query;
+    );
+    return query;
 }
 
 export async function getPostById(id) {
@@ -50,7 +50,7 @@ export async function getPostById(id) {
         `SELECT posts.*, users."pictureUrl", users.name FROM posts JOIN
          users ON users.id = posts."userId" WHERE post.id = $1 
          ORDER BY date DESC`, [id]
-      );
+    );
 }
 
 export async function getPostByUserId(userId) {
@@ -93,7 +93,7 @@ export async function postOwner(user, id) {
     return await db.query(
         `SELECT user_id, id FROM posts WHERE user_id = $1 and id = $2`,
         [user.id, id]
-      );
+    );
 }
 
 export async function postDelete(id) {
@@ -104,7 +104,7 @@ export function createLike(postId, userId) {
     return db.query(
         `INSERT INTO likes ("postId", "userId") VALUES ($1, $2);`,
         [postId, userId]
-      );
+    );
 }
 
 export function deleteLikeDB(postId, userId) {
@@ -112,5 +112,5 @@ export function deleteLikeDB(postId, userId) {
         DELETE FROM likes
         WHERE "postId" = $1 AND "userId" = $2;`,
         [postId, userId]
-      );
+    );
 }

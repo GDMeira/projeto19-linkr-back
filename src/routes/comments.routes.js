@@ -3,7 +3,7 @@ import { tokenValidation } from "../middlewares/tokenValidation.js";
 import { stringStripHtml } from "../middlewares/stringStripHtmlValidation.js";
 import { validadeSchema } from "../middlewares/validateSchema.js";
 import { commentSchema } from "../schemas/comment.schema.js";
-import { createComment } from "../controllers/comment.controller.js";
+import { createComment } from "../controllers/comments.controller.js";
 
 const commentsRouter = Router()
 

@@ -9,6 +9,7 @@ export async function createComment(req, res) {
 
         res.sendStatus(201);
     } catch (error) {
+        console.log(error);
         res.status(500).send(error.message);
     }
 }
