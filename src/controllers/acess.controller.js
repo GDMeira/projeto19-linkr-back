@@ -35,7 +35,6 @@ export async function login(req, res) {
         if (!validateSenha) return res.status(401).send('As senhas nao sao iguais')
 
         //SALVA OS DADOS DO USUARIO NA TABELA sessions
-        //console.log(user.rows[0],"dados do user")
         await insertUserSession(user.rows[0].id, token)
         const response = {
             image: user.rows[0].pictureUrl,
