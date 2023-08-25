@@ -28,7 +28,12 @@ export async function allPosts(userId) {
                 FROM comments
                 JOIN users ON users.id = comments."userId"
                 WHERE comments."postId" = posts.id
-            ) AS comments
+            ) AS comments,
+            (
+                SELECT COALESCE(COUNT(reposts."postId"), 0)
+                FROM reposts
+                WHERE reposts."postId" = posts.id
+            ) AS "repostsNumber"
             FROM posts 
             JOIN users ON users.id = posts."userId"
             JOIN follows ON follows."followerId" = $1
@@ -156,3 +161,8 @@ export function deleteLikeDB(postId, userId) {
     );
 }
 
+export function createRepost(postId, userId) {
+    return db.query(`/* SQL */
+        INSERT INTO reposts ("postId", "userId")
+        VALUES ($1, $2);`, [postId, userId])
+}

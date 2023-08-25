@@ -1,6 +1,6 @@
 import db from "../database/database.js";
 import urlMetadata from "url-metadata";
-import { allPosts, newPost, getPostByUserId, postDelete, createLike, deleteLikeDB, postEdit, readPostById } from "../repositories/posts.repository.js";
+import { allPosts, newPost, getPostByUserId, postDelete, createLike, deleteLikeDB, postEdit, readPostById, createRepost } from "../repositories/posts.repository.js";
 import reactStringReplace from "react-string-replace";
 import { createHashtags, deleteHashsFromMidTableAndUpdateCount, deleteHashsWithNoCount } from "../repositories/hashtag.repositories.js";
 
@@ -149,8 +149,8 @@ export async function reposts(req, res){
   console.log(postId)
   
   try {
-    const posts = await db.query(`SELECT * FROM posts WHERE id=$1`,[postId])
-    console.log(posts.rows)
+    await createRepost(postId, userId);
+
     return res.sendStatus(204);
   } catch (error) {
     console.log(error.message)
