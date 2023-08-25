@@ -34,7 +34,7 @@ export async function login(req, res) {
         const validateSenha = bcrypt.compareSync(password, user.rows[0].password)
         if (!validateSenha) return res.status(401).send('As senhas nao sao iguais')
 
-        //SALVA OS DADOS DO USUARIO NA TABELA users
+        //SALVA OS DADOS DO USUARIO NA TABELA sessions
         await insertUserSession(user.rows[0].id, token)
         const response = {
             image: user.rows[0].pictureUrl,

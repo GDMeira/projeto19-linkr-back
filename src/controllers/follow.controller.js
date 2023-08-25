@@ -4,7 +4,6 @@ import e from "cors";
 
 export async function follow(req, res) {
     const followerId = res.locals.userId;
-    console.log(res.locals)
         
     const { followedId } = req.params
 

@@ -28,6 +28,7 @@ CREATE TABLE public.comments (
     id integer NOT NULL,
     "postId" integer,
     "userId" integer,
+    comment text NOT NULL,
     "createdAt" timestamp without time zone DEFAULT now()
 );
 
