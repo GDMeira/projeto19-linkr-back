@@ -10,3 +10,8 @@ export async function unfollowUser (followerId, followedId){
     return result
 }
 
+export async function getFolloweds (followerId){
+    const result = await db.query('SELECT * FROM follows WHERE "followerId" = $1', [followerId])
+    return result
+}
+
