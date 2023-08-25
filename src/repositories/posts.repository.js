@@ -55,11 +55,13 @@ export async function newPost(userId, link, title,
     return query;
 }
 
-export async function getPostById(id) {
+export async function readPostById(id) {
     return await db.query(
-        `SELECT posts.*, users."pictureUrl", users.name FROM posts JOIN
-         users ON users.id = posts."userId" WHERE post.id = $1 
-         ORDER BY date DESC`, [id]
+        `/* SQL */
+        SELECT posts.*, users."pictureUrl", users."userName" 
+        FROM posts 
+        JOIN users ON users.id = posts."userId" 
+        WHERE posts.id = $1;`, [id]
     );
 }
 
@@ -127,7 +129,7 @@ export async function getPostByUserId(userId) {
 export async function postDelete(id) {
     await db.query(`DELETE FROM likes WHERE "postId" = $1`, [id]);
     await db.query(`DELETE FROM reposts WHERE "postId" = $1`, [id]);
-    await db.query(`DELETE FROM posts_hashtags WHERE "postId" = $1`, [id]);
+    await db.query(`DELETE FROM comments WHERE "postId" = $1`, [id]);
     return await db.query(`DELETE FROM posts WHERE id = $1;`, [id]);
 }
 

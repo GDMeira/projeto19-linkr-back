@@ -24,7 +24,7 @@ export function readPostsWithHashtag(hashtag) {
     `, [hashtag]);
 }
 
-export function readHashtags(hashtag) {
+export function readHashtags() {
     return db.query(`
         SELECT hashtags.name
         FROM hashtags
@@ -34,11 +34,11 @@ export function readHashtags(hashtag) {
 }
 
 export function createHashtags(hashtags, postId) {
-    return db.query(`
+    return db.query(`/* SQL */
         WITH inserted_hashtags AS (
             INSERT INTO hashtags (name)
             VALUES ${hashtags.map((_, index) => `($${index + 2})`).join(', ')}
-            ON CONFLICT (name) DO UPDATE SET count = EXCLUDED.count + 1
+            ON CONFLICT (name) DO UPDATE SET count = hashtags.count + 1
             RETURNING name
         )
         INSERT INTO posts_hashtags ("postId", "hashtagName")
@@ -46,4 +46,24 @@ export function createHashtags(hashtags, postId) {
             FROM inserted_hashtags
         ON CONFLICT DO NOTHING;
     `, [postId, ...hashtags]);
+}
+
+export function deleteHashsFromMidTableAndUpdateCount(hashtags, postId) {
+    return db.query(`/* SQL */
+        WITH deleted_hashtags AS (
+            DELETE FROM posts_hashtags 
+            WHERE posts_hashtags."hashtagName" = ANY($1) AND posts_hashtags."postId" = $2
+            RETURNING "hashtagName"
+        )
+        UPDATE hashtags 
+        SET count = count - 1
+        WHERE name IN (SELECT "hashtagName" FROM deleted_hashtags);
+    `, [hashtags, postId]);
+}
+
+export function deleteHashsWithNoCount() {
+    return db.query(`/* SQL */
+        DELETE FROM hashtags
+        WHERE count = 0;
+    `);
 }
