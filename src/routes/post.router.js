@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { validadeSchema } from "../middlewares/validateSchema.js"
 import { tokenValidation } from "../middlewares/tokenValidation.js"
-import { getposts, getPostById, deletePost, editPost, postLink, getPostByUser, postLike, deleteLike } from "../controllers/post.controller.js"
+import { getposts, getPostById, deletePost, editPost, postLink, getPostByUser, postLike, deleteLike, reposts } from "../controllers/post.controller.js"
 import { postSchema } from "../schemas/post.schemas.js"
 
 
@@ -15,7 +15,7 @@ postsRouter.post("/posts/:postId/like", tokenValidation, postLike);
 postsRouter.delete("/posts/:postId/dislike", tokenValidation, deleteLike);
 postsRouter.put("/posts/:postId", tokenValidation, editPost);
 postsRouter.delete("/posts/:postId", tokenValidation, deletePost);
-
+postsRouter.post("/reposts", reposts);
 
 
 export default postsRouter

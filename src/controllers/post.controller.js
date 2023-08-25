@@ -1,3 +1,4 @@
+import db from "../database/database.js";
 import urlMetadata from "url-metadata";
 import { allPosts, newPost, getPostByUserId, postDelete, createLike, deleteLikeDB, postEdit } from "../repositories/posts.repository.js";
 import reactStringReplace from "react-string-replace";
@@ -111,6 +112,19 @@ export async function deleteLike(req, res) {
 
     res.sendStatus(204);
   } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+export async function reposts(req, res){
+  const {postId, userId}= req.body 
+  console.log(postId)
+  
+  try {
+    const posts = await db.query(`SELECT * FROM posts WHERE id=$1`,[postId])
+    console.log(posts.rows)
+    return res.sendStatus(204);
+  } catch (error) {
+    console.log(error.message)
     return res.status(500).send(error.message);
   }
 }
