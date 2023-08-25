@@ -1,5 +1,6 @@
-import { followUser, unfollowUser } from "../repositories/follow.repositories.js";
+import { followUser, unfollowUser, getFolloweds } from "../repositories/follow.repositories.js";
 import db from "../database/database.js";
+import e from "cors";
 
 export async function follow(req, res) {
     const followerId = res.locals.userId;
@@ -57,3 +58,16 @@ export async function unfollow(req, res) {
 
 }
 
+export async function getFollowedsUsers(req, res) {
+    const followerId = res.locals.userId;
+
+    try {
+        const result = await getFolloweds(followerId);
+        res.send(result.rows);
+    }
+    catch (err) {
+        console.log(err)
+        res.sendStatus(500);
+    }
+}
+    
