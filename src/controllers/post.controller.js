@@ -1,8 +1,8 @@
 import db from "../database/database.js";
 import urlMetadata from "url-metadata";
-import { allPosts, newPost, getPostByUserId, postDelete, createLike, deleteLikeDB, postEdit } from "../repositories/posts.repository.js";
+import { allPosts, newPost, getPostByUserId, postDelete, createLike, deleteLikeDB, postEdit, readPostById } from "../repositories/posts.repository.js";
 import reactStringReplace from "react-string-replace";
-import { createHashtags } from "../repositories/hashtag.repositories.js";
+import { createHashtags, deleteHashsFromMidTableAndUpdateCount, deleteHashsWithNoCount } from "../repositories/hashtag.repositories.js";
 
 export async function postLink(req, res) {
   const userId = res.locals.userId;
@@ -44,7 +44,7 @@ export async function getPostById(req, res) {
   const { id } = req.params;
 
   try {
-    const getPost = await getPostById(id);
+    const getPost = await readPostById(id);
     return res.send(getPost.rows);
   } catch (error) {
     return res.status(500).send(error.message);
@@ -67,6 +67,14 @@ export async function deletePost(req, res) {
   const { postId } = req.params;
   if (!postId) return res.status(404).send("Post doesn't exist");
   try {
+    const post = await readPostById(postId);
+    const hashtags = [];
+    reactStringReplace(post.rows[0].postDescription, /#(\w+)/g, (match) => {
+      if (!hashtags.includes(match)) hashtags.push(match)
+    });
+
+    await deleteHashsFromMidTableAndUpdateCount(hashtags, postId);
+    await deleteHashsWithNoCount();
     postDelete(postId)
 
     res.sendStatus(200);
@@ -76,10 +84,31 @@ export async function deletePost(req, res) {
 }
 
 export async function editPost(req, res) {
-  const {postId} = req.params;
-  const {description} = req.body
+  const { postId } = req.params;
+  const { description } = req.body
   if (!postId) return res.status(404).send("Post doesn't exist");
+
+  const newHashtags = [];
+  reactStringReplace(description, /#(\w+)/g, (match) => {
+    if (!newHashtags.includes(match)) newHashtags.push(match)
+  });
+
+  const post = await readPostById(postId);
+
+  const olderHashtags = [];
+  reactStringReplace(post.rows[0].postDescription, /#(\w+)/g, (match) => {
+    if (!olderHashtags.includes(match)) olderHashtags.push(match)
+  });
+
+  const deletedHashtags = olderHashtags.filter(h => !newHashtags.includes(h));
+  const createdHashtags = newHashtags.filter(h => !olderHashtags.includes(h));
+
   try {
+    if (createHashtags.length > 0) await createHashtags(createdHashtags, postId);
+    if (deletedHashtags.length > 0) {
+      await deleteHashsFromMidTableAndUpdateCount(deletedHashtags, postId);
+      await deleteHashsWithNoCount();
+    }
 
     postEdit(postId, description)
 
@@ -93,7 +122,7 @@ export async function editPost(req, res) {
 export async function postLike(req, res) {
   const { postId } = req.params;
   if (!Number(postId) || Number(postId) < 1) return res.status(404).send('Id do post inválido.')
-  
+
   try {
     await createLike(postId, res.locals.userId);
 
@@ -106,7 +135,7 @@ export async function postLike(req, res) {
 export async function deleteLike(req, res) {
   const { postId } = req.params;
   if (!Number(postId) || Number(postId) < 1) return res.status(404).send('Id do post inválido.')
-  
+
   try {
     await deleteLikeDB(postId, res.locals.userId);
 
